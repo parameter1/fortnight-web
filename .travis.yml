@@ -2,29 +2,13 @@ language: node_js
 node_js: "8.11"
 cache: yarn
 
-_production-env: &production-env
-  ENVIRONMENT: production
-  RANCHER_CLUSTERID: c-gxsr7
-
-# _staging-env: &staging-env
-#   ENVIRONMENT: staging
-#   RANCHER_CLUSTERID: c-rc5kp
-
 _production-job: &production-job
   stage: production
   name: SERVICE_NAME
   script: scripts/deploy.js SERVICE_NAME
   install: skip
   env:
-    <<: *production-env
-
-# _staging-job: &staging-job
-#   stage: staging
-#   name: SERVICE_NAME
-#   script: scripts/deploy.js SERVICE_NAME
-#   install: skip
-#   env:
-#     <<: *staging-env
+    - "ENVIRONMENT=production"
 
 stages:
   - name: test
@@ -36,32 +20,16 @@ stages:
   - name: production-finished
     if: tag =~ /^v\d+\.\d+\.\d+$/
 
-  # - name: staging-started
-  #   if: tag is present
-  # - name: staging
-  #   if: tag is present
-  # - name: staging-finished
-  #   if: tag is present
-
 jobs:
   include:
     - stage: test
       env:
-        NODE_ENV: test
+        - "NODE_ENV=test"
 
-    - stage: production-started
+    - <<: *production-job
+      stage: production-started
       name: Deployment Started
       script: npx @base-cms/website-deployment-tool notify-started
-      install: skip
-      env:
-        <<: *production-env
-
-    # - stage: staging-started
-    #   name: Deployment Started
-    #   script: npx @base-cms/website-deployment-tool notify-started
-    #   install: skip
-    #   env:
-    #     <<: *staging-env
 
     #############################
     # vvv ADD SERVICES HERE vvv #
@@ -70,24 +38,12 @@ jobs:
     - <<: *production-job
       name: Web Service
       script: scripts/deploy.js web
-    # - <<: *staging-job
-    #   name: Web Service
-    #   script: scripts/deploy.js web
 
     #############################
     # ^^^ ADD SERVICES HERE ^^^ #
     #############################
 
-    - stage: production-finished
+    - <<: *production-job
+      stage: production-finished
       name: Deployment Finished
       script: npx @base-cms/website-deployment-tool notify-finished
-      install: skip
-      env:
-        <<: *production-env
-
-    # - stage: staging-finished
-    #   name: Deployment Finished
-    #   script: npx @base-cms/website-deployment-tool notify-finished
-    #   install: skip
-    #   env:
-    #     <<: *staging-env
