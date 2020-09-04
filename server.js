@@ -1,5 +1,5 @@
-require('./newrelic');
-require('dotenv').config();
+require('./src/datadog');
+require('./src/newrelic');
 const next = require('next');
 const loadServer = require('./src/server');
 

@@ -16,6 +16,8 @@ services:
       NODE_ENV: development
       PORT: ${APP_PORT-3005}
       GRAPHQL_URI: ${GRAPHQL_URI-http://host.docker.internal:8100}
+      DD_TRACE_ENABLED: ${DD_TRACE_ENABLED-false}
+      NEW_RELIC_ENABLED: ${NEW_RELIC_ENABLED-false}
 volumes:
   node_modules: {}
   yarn-cache: {}
