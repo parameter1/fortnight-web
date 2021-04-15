@@ -11,6 +11,8 @@ import StoryView from '../components/StoryView';
 
 import pageQuery from '../gql/queries/pages/story.graphql';
 
+const { log } = console;
+
 class Story extends Component {
   constructor(props) {
     super(props);
@@ -39,6 +41,7 @@ class Story extends Component {
 
   static async getInitialProps({
     req,
+    res,
     query,
     apollo,
   }) {
@@ -54,6 +57,39 @@ class Story extends Component {
     if (!publishedStory) {
       // No story was found for this id. Return a 404.
       throw httpErrors.notFound(`No story was found for id '${id}'`);
+    }
+
+    // Check for and redirect to canonical url
+    const { url } = publishedStory;
+    if (req) { // Only run on backend requests
+      const requestUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+      if (url !== requestUrl) {
+        // Build backend equivalent of `window.location.search` (?foo=bar&bat=baz)
+        const queryString = Object.keys(req.query)
+          .map(key => ([encodeURIComponent(key), encodeURIComponent(req.query[key])].join('=')))
+          .reduce((str, kv, i) => [
+            ...(i === 0 ? ['?'] : []),
+            str,
+            ...(str.length ? ['&'] : []),
+            kv,
+          ].join(''), '');
+        const toUrl = `${url}${queryString}`;
+        if (requestUrl.includes('localhost')) {
+          log('Aborting redirect! In production, this page would redirect to ', toUrl);
+        } else {
+          res.redirect(301, toUrl);
+        }
+      }
+    } else { // frontend requests
+      const requestUrl = `${window.location.href}`.split('?', 1)[0];
+      if (url !== requestUrl) {
+        const toUrl = url + window.location.search;
+        if (requestUrl.includes('localhost')) {
+          log('Aborting redirect! In production, this page would redirect to ', toUrl);
+        } else {
+          window.location.href = toUrl;
+        }
+      }
     }
     return { publishedStory, preview };
   }
