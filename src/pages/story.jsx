@@ -63,7 +63,7 @@ class Story extends Component {
     // Check for and redirect to canonical url
     const { url } = publishedStory;
     if (req) { // Only run on backend requests
-      const requestUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+      const requestUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
       if (url !== requestUrl) {
         // Build backend equivalent of `window.location.search` (?foo=bar&bat=baz)
         const queryString = Object.keys(req.query)

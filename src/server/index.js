@@ -7,6 +7,7 @@ const { PORT } = env;
 
 const server = express();
 server.use(helmet());
+server.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
 
 module.exports = (client) => {
   const handle = client.getRequestHandler();
