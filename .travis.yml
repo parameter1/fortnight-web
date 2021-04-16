@@ -7,6 +7,7 @@ _production-job: &production-job
   name: SERVICE_NAME
   script: scripts/deploy.js SERVICE_NAME
   install: skip
+  node_js: "10.15"
   env:
     - "ENVIRONMENT=production"
 
