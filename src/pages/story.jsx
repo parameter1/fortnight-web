@@ -11,6 +11,7 @@ import StoryView from '../components/StoryView';
 
 import pageQuery from '../gql/queries/pages/story.graphql';
 
+const { NODE_ENV } = process.env;
 const { log } = console;
 
 class Story extends Component {
@@ -74,7 +75,7 @@ class Story extends Component {
             kv,
           ].join(''), '');
         const toUrl = `${url}${queryString}`;
-        if (requestUrl.includes('localhost')) {
+        if (NODE_ENV !== 'production') {
           log('Aborting redirect! In production, this page would redirect to ', toUrl);
         } else {
           res.redirect(301, toUrl);
@@ -84,7 +85,7 @@ class Story extends Component {
       const requestUrl = `${window.location.href}`.split('?', 1)[0];
       if (url !== requestUrl) {
         const toUrl = url + window.location.search;
-        if (requestUrl.includes('localhost')) {
+        if (NODE_ENV !== 'production' || requestUrl.includes('localhost')) {
           log('Aborting redirect! In production, this page would redirect to ', toUrl);
         } else {
           window.location.href = toUrl;
